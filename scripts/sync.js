@@ -69,8 +69,8 @@ window.addEventListener('beforeunload', () => {
 
 // app
 bc.postMessage(message('connect'));
-const tid = new UIComponent('#tid-holder');
-tid.text = TAB_ID;
+const tid = new UIComponent('title');
+tid.text = `Client ${TAB_ID}`;
 /**
  * @type HTMLCanvasElement
  */
