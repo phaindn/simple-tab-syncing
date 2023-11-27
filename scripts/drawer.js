@@ -1,29 +1,105 @@
+/**
+ * @typedef {Object} Coordinate
+ * @property {number} x
+ * @property {number} y
+ */
+/**
+ * @typedef {Object} Opponent
+ * @property {number} screenTop
+ * @property {number} screenLeft
+ * @property {number} innerWidth
+ * @property {number} outerWidth
+ * @property {number} innerHeight
+ * @property {number} outerHeight
+ * @property {Coordinate} center
+ */
+
 (function draw() {
     /**
-     * @type HTMLCanvasElement
+     * @type {BroadcastChannel}
      */
-    const $canvas = document.querySelector('#app');
-    const ctx = $canvas.getContext("2d");
-    const center = {
-        x: 95,
-        y: 50,
-    }
-    ctx.beginPath();
-    ctx.arc(center.x, center.y, 40, 0, 2 * Math.PI);
-    ctx.stroke();
+    const bc = window.bc;
 
-    const screen = window.screen;
-    let isLeftSide = screen.availWidth / 2.2 > window.screenLeft;
-    if (isLeftSide) {
-        const screenRight = window.screenLeft + window.innerWidth;
+    /**
+     * @type {Opponent}
+     */
+    let opponent;
+    let center = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+    }
+
+    function render() {
+        center = {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+        }
+        /**
+         * @type {HTMLCanvasElement}
+         */
+        const $canvas = document.querySelector('#app');
+        $canvas.width = window.innerWidth;
+        $canvas.height = window.innerHeight;
+        const ctx = $canvas.getContext("2d");
         ctx.beginPath();
-        ctx.moveTo(center.x, center.y)
-        ctx.lineTo(screenRight - center.x, center.y)
+        ctx.arc(center.x, center.y, 40, 0, 2 * Math.PI);
         ctx.stroke();
-    } else {
+
+        if (!opponent) {
+            return;
+        }
+        let isLeftSide = window.screenLeft < opponent.screenLeft;
         ctx.beginPath();
         ctx.moveTo(center.x, center.y)
-        ctx.lineTo(0, center.y)
+        const bookmarkHeight = (outerHeight - innerHeight) / 2;
+        let lineTo = {
+            x: opponent.screenLeft + opponent.center.x,
+            y: opponent.screenTop + opponent.center.y - screenTop + bookmarkHeight,
+        }
+        if (!isLeftSide) {
+            lineTo.x = opponent.screenLeft - screenLeft + opponent.center.x;
+            lineTo.y = opponent.screenTop + opponent.center.y - screenTop;
+        }
+        ctx.lineTo(lineTo.x, lineTo.y);
         ctx.stroke();
     }
+
+    function getPingData() {
+        return {
+            screenLeft,
+            screenTop,
+            outerWidth,
+            outerHeight,
+            innerWidth,
+            innerHeight,
+            center,
+        };
+    }
+
+    bc.addEventListener('message', (event) => {
+        switch (event.data.type) {
+            case 'ping': {
+                opponent = event.data.data;
+                bc.postMessage(createMessage('pong', getPingData()));
+                break;
+            }
+            case 'pong': {
+                opponent = event.data.data;
+                break;
+            }
+            case 'disconnect': {
+                opponent = undefined;
+                break;
+            }
+        }
+        render();
+    })
+    bc.postMessage(createMessage('ping', getPingData()));
+    window.addEventListener('windowmove', (event) => {
+        bc.postMessage(createMessage('ping', getPingData()));
+    });
+    window.addEventListener('resize', (event) => {
+        bc.postMessage(createMessage('ping', getPingData()));
+    });
+    render();
 })();
