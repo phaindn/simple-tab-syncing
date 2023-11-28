@@ -48,17 +48,11 @@
         if (!opponent) {
             return;
         }
-        let isLeftSide = window.screenLeft < opponent.screenLeft;
         ctx.beginPath();
         ctx.moveTo(center.x, center.y)
-        const bookmarkHeight = (outerHeight - innerHeight) / 2;
         let lineTo = {
-            x: opponent.screenLeft + opponent.center.x,
-            y: opponent.screenTop + opponent.center.y - screenTop + bookmarkHeight,
-        }
-        if (!isLeftSide) {
-            lineTo.x = opponent.screenLeft - screenLeft + opponent.center.x;
-            lineTo.y = opponent.screenTop + opponent.center.y - screenTop;
+            x: opponent.screenLeft + opponent.center.x - screenLeft,
+            y: opponent.screenTop + opponent.center.y - screenTop,
         }
         ctx.lineTo(lineTo.x, lineTo.y);
         ctx.stroke();
