@@ -1,4 +1,4 @@
-class UIComponent {
+export class UIComponent {
     #el;
     #proxy;
 
@@ -28,7 +28,7 @@ class UIComponent {
     }
 }
 
-class CanvasComponent extends UIComponent {
+export class CanvasComponent extends UIComponent {
     constructor(selectorOrElement) {
         super(selectorOrElement);
     }

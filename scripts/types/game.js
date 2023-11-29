@@ -169,36 +169,6 @@ export class Shooter extends BaseObject {
      */
     Bullet;
 
-    // /**
-    //  * @param {number} width 
-    //  * @param {number} height 
-    //  * @param {string} image 
-    //  * @param {number} speed 
-    //  * @param {Bullet} bullet 
-    //  */
-    // constructor(width, height, image, speed, bullet) {
-    //     super(width, height, image);
-    //     this.speed = speed;
-    //     this.Bullet = bullet;
-    //     this.level = 1;
-    // }
-
-    // /**
-    //  * @overload
-    //  * @param {number} width 
-    //  * @param {number} height 
-    //  * @param {string} image 
-    //  * @param {number} speed 
-    //  * @param {Bullet} bullet 
-    //  */
-    // constructor(width, height, image, speed, angle, bullet) {
-    //     super(width, height, image);
-    //     this.speed = speed;
-    //     this.angle = angle;
-    //     this.Bullet = bullet;
-    //     this.level = 1;
-    // }
-
     /**
      * @overload
      * @param {number} width 

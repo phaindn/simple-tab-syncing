@@ -14,13 +14,10 @@
  * @property {Coordinate} center
  */
 
+import { createMessage, syncChannel } from "./sync.js";
 import { MachineGunShooter, Tower } from "./types/game.js";
 
-(function draw() {
-    /**
-     * @type {BroadcastChannel}
-     */
-    const bc = window.bc;
+export function renderCanvas() {
 
     /**
      * @type {Opponent}
@@ -31,7 +28,7 @@ import { MachineGunShooter, Tower } from "./types/game.js";
         y: window.innerHeight / 2,
     }
 
-    function render() {
+    function _render() {
         center = {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
@@ -61,33 +58,30 @@ import { MachineGunShooter, Tower } from "./types/game.js";
             x: opponent.screenLeft + opponent.center.x - screenLeft,
             y: opponent.screenTop + opponent.center.y - screenTop,
         }
-        const current = {
-            x: screenLeft + center.x,
-            y: screenTop + center.y,
-        }
-        const currentVector = {
-            x: 0,
-            y: current.y,
-        }
-        const lineToVector = {
-            x: current.x - lineTo.x,
-            y: current.y - lineTo.y,
-        }
-
-        ctx.reset();
 
         ctx.beginPath();
         ctx.moveTo(center.x, center.y)
         ctx.lineTo(lineTo.x, lineTo.y);
         ctx.stroke();
 
-        const cosine = (currentVector.x * lineToVector.x + currentVector.y * lineToVector.y) / (Math.sqrt(currentVector.x**2 + currentVector.y**2) * Math.sqrt(lineToVector.x**2 + lineToVector.y**2));
+        const O = {
+            x: screenLeft + center.x,
+            y: screenTop + center.y,
+        }
 
-        const angle = Math.acos(cosine) / Math.PI * 180;
-        tower.rotateGun(angle);
+        const B = {
+            x: opponent.screenLeft + opponent.center.x - O.x,
+            y: opponent.screenTop + opponent.center.y - O.y,
+        }
+        const angle = Math.atan(B.y / B.x);
+
+        if (B.x >= 0) {
+            tower.rotateGun(angle);
+        } else {
+            tower.rotateGun(angle + Math.PI);
+        }
         tower.drawTo(ctx, center.x, center.y);
-        
-        
+
     }
 
     function getPingData() {
@@ -102,11 +96,11 @@ import { MachineGunShooter, Tower } from "./types/game.js";
         };
     }
 
-    bc.addEventListener('message', (event) => {
+    syncChannel.addEventListener('message', (event) => {
         switch (event.data.type) {
             case 'ping': {
                 opponent = event.data.data;
-                bc.postMessage(createMessage('pong', getPingData()));
+                syncChannel.postMessage(createMessage('pong', getPingData()));
                 break;
             }
             case 'pong': {
@@ -118,14 +112,14 @@ import { MachineGunShooter, Tower } from "./types/game.js";
                 break;
             }
         }
-        render();
+        _render();
     })
-    bc.postMessage(createMessage('ping', getPingData()));
+    syncChannel.postMessage(createMessage('ping', getPingData()));
     window.addEventListener('windowmove', (event) => {
-        bc.postMessage(createMessage('ping', getPingData()));
+        syncChannel.postMessage(createMessage('ping', getPingData()));
     });
     window.addEventListener('resize', (event) => {
-        bc.postMessage(createMessage('ping', getPingData()));
+        syncChannel.postMessage(createMessage('ping', getPingData()));
     });
-    render();
-})();
+    _render();
+}

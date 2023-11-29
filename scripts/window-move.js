@@ -1,5 +1,4 @@
-
-class WindowMoveEvent extends CustomEvent {
+export class WindowMoveEvent extends CustomEvent {
     constructor(x, y) {
         super('windowmove', {
             detail: {
@@ -10,7 +9,7 @@ class WindowMoveEvent extends CustomEvent {
     }
 }
 
-(function() {
+export function startWindowMoveEventDispatcher() {
     const prevScreen = {
         x: window.screenLeft,
         y: window.screenTop,
@@ -28,4 +27,4 @@ class WindowMoveEvent extends CustomEvent {
     }
 
     runTask();
-})()
+}
