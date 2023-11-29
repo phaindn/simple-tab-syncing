@@ -49,7 +49,7 @@ export function renderCanvas() {
 
         Object.values(opponents).forEach(opponent => {
             const tower = new Tower();
-            tower.attach(new MachineGunShooter(Math.PI / 2));
+            tower.attach(new MachineGunShooter(Math.PI / 2, 0));
             
             if (!opponent) {
                 tower.drawTo(ctx, center.x, center.y);

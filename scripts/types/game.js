@@ -4,19 +4,19 @@
  * @property {number} y
  */
 
-// function loadResouce(width, height, src) {
-//     const image = new Image(width, height);
-//     image.src = src;
-//     image.onload = (ev) => {
-//         console.log(ev)
-//     }
+/**
+ * @param {number} width 
+ * @param {number} height 
+ * @param {string} src 
+ * @returns {HTMLImageElement}
+ */
+function loadResouce(width, height, src) {
+    const image = new Image(width, height);
+    image.src = src;
 
-//     return image;
-// }
+    return image;
+}
 
-// const RESOURCES = {
-//     tower: loadResouce(80, 80, '/assets/Tower.png'),
-// }
 
 class BaseObject {
     /**
@@ -38,7 +38,7 @@ class BaseObject {
     /**
      * @type HTMLImageElement
      */
-    #image;
+    _image;
 
     /**
      * @constant
@@ -51,11 +51,13 @@ class BaseObject {
      * @param {number} height 
      * @param {string} imageSourcePath 
      */
-    constructor(width, height, imageSourcePath) {
-        this.width = width;
-        this.height = height;
-        this.#image = new Image(width, height);
-        this.#image.src = imageSourcePath;
+    constructor(width = 0, height = 0, imageSourcePath) {
+        this.width = width || 0;
+        this.height = height || 0;
+        this._image = new Image(width || 0, height || 0);
+        if (imageSourcePath) {
+            this._image.src = imageSourcePath;
+        }
         this.ATTACH_POSITION = {
             x: 0,
             y: 0,
@@ -68,14 +70,12 @@ class BaseObject {
      * @param {number} y 
      */
     drawTo(ctx, x, y) {
-        // x = x - this.ATTACH_POSITION.x;
-        // y = y - this.ATTACH_POSITION.y;
         this.x = x;
         this.y = y;
-        if (this.#image.complete) {
+        if (this._image.complete) {
             this.draw(ctx);
         } else {
-            this.#image.onload = () => {
+            this._image.onload = () => {
                 this.draw(ctx);
             }
         }
@@ -94,7 +94,7 @@ class BaseObject {
     drawAtCenter(ctx) {
         const cw = ctx.canvas.width;
         const ch = ctx.canvas.height;
-        ctx.drawImage(this.#image, cw/2 - this.ATTACH_POSITION.x, ch/2 - this.ATTACH_POSITION.y, this.width, this.height);
+        ctx.drawImage(this._image, cw/2 - this.ATTACH_POSITION.x, ch/2 - this.ATTACH_POSITION.y, this.width, this.height);
     }
 }
 
@@ -142,7 +142,26 @@ export class Tower extends BaseObject {
     }
 
 }
+
+/**
+ * @typedef IShooterLevel
+ * @property {HTMLImageElement} image
+ * @property {number} width
+ * @property {number} height
+ * @property {number} speed
+ * @property {Coordinate} ATTACH_POSITION
+ */
+
+/**
+ * @implements {IShooterLevel}
+ */
 export class Shooter extends BaseObject {
+    /**
+     * @type {IShooterLevel[]}
+     * @static
+     */
+    static LEVELS = [];
+
     /**
      * @type {number}
      */
@@ -156,13 +175,7 @@ export class Shooter extends BaseObject {
     /**
      * @type {number}
      */
-    level;
-
-    /**
-     * @constant
-     * @type {Coordinate}
-     */
-    ATTACH_POSITION;
+    #level;
 
     /**
      * @type {Bullet}
@@ -170,25 +183,30 @@ export class Shooter extends BaseObject {
     Bullet;
 
     /**
-     * @overload
-     * @param {number} width 
-     * @param {number} height 
-     * @param {string} image 
-     * @param {number} speed 
-     * @param {Bullet} bullet 
-     * @param {number} attachPositionX 
-     * @param {number} attachPositionY 
+     * @param {number} angle
+     * @param {number} level
      */
-    constructor(width, height, image, speed, angle, bullet, attachPositionX, attachPositionY) {
-        super(width, height, image);
-        this.speed = speed;
+    constructor(angle = 0, level = 0) {
+        super();
+        this.level = level;
         this.angle = angle;
-        this.Bullet = bullet;
-        this.level = 1;
-        this.ATTACH_POSITION = {
-            x: attachPositionX,
-            y: attachPositionY,
-        }
+    }
+
+    /**
+     * @override
+     * @param {number} value
+     */
+    set level(value) {
+        this.#level = value;
+        this.speed = this.__proto__.constructor.LEVELS[value].speed;
+        this.width = this.__proto__.constructor.LEVELS[value].width;
+        this.height = this.__proto__.constructor.LEVELS[value].height;
+        this.image = this.__proto__.constructor.LEVELS[value].image;
+        this.ATTACH_POSITION = this.__proto__.constructor.LEVELS[value].ATTACH_POSITION;
+    }
+
+    get level() {
+        return this.#level;
     }
 
     /**
@@ -218,6 +236,49 @@ export class Shooter extends BaseObject {
     #createBullet() {
     }
 }
+
+export class MachineGunShooter extends Shooter {
+
+    static {
+        const src = (level) => `/assets/MG${level}.png`;
+        const LEVELS = [
+            {
+                image: loadResouce(80, 167, src`1`),
+                width: 80,
+                height: 167,
+                speed: 0.5,
+                ATTACH_POSITION: {
+                    x: 167 * 9.5 / 29,
+                    y: 80 / 2 * 3
+                }
+            },
+            {
+                image: loadResouce(80, 167, src`2`),
+                width: 80,
+                height: 167,
+                speed: 0.333,
+                ATTACH_POSITION: {
+                    x: 167 * 9.5 / 29,
+                    y: 80 / 2 * 3
+                }
+            },
+            {
+                image: loadResouce(80, 167, src`3`),
+                width: 80,
+                height: 167,
+                speed: 0.2,
+                ATTACH_POSITION: {
+                    x: 167 * 9.5 / 29,
+                    y: 80 / 2 * 3
+                }
+            },
+        ];
+        this.LEVELS = LEVELS;
+    }
+
+
+}
+
 export class Bullet extends BaseObject {
     /**
      * @type {number}
@@ -249,21 +310,3 @@ export class Bullet extends BaseObject {
         this.damage = damage
     }
 }
-
-export class MachineGunShooter extends Shooter {
-
-    /**
-     * @param {number} angle 
-     */
-    constructor(angle = 0) {
-        const w = 80;
-        const h = 167;
-        super(w, h, '/assets/MG.png', 5, angle, Bullet, h * 9.5 / 29, w / 2 * 3);
-    }
-}
-
-// ========================== Exports ==========================
-
-window.Tower = Tower;
-window.Shooter = Shooter;
-window.Bullet = Bullet;
