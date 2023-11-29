@@ -297,17 +297,17 @@ export class CannonShooter extends Shooter {
                 speed: 0.333,
                 ATTACH_POSITION: {
                     x: 154 * 9.5 / 29,
-                    y: 80 / 2 * 3
+                    y: 75 / 2 * 3
                 }
             },
             {
                 image: loadResouce(80, 167, src`3`),
-                width: 80,
+                width: 100,
                 height: 167,
                 speed: 0.2,
                 ATTACH_POSITION: {
-                    x: 120 * 9.5 / 29,
-                    y: 80 / 2 * 3
+                    x: 150 * 9.5 / 29,
+                    y: 70 / 2 * 3
                 }
             },
         ];

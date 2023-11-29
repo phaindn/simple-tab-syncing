@@ -18,21 +18,9 @@ import { createMessage, syncChannel } from "./utils/sync.js";
 import { CannonShooter, MachineGunShooter, MissileLauncherShooter, Tower } from "./types/game.js";
 
 export function renderCanvas() {
-    const params = new URLSearchParams(location.search);
-    const level = params.get('level') || 0;
-    const type = params.get('type');
-
-    let ShooterConstructor = MachineGunShooter;
-    switch(type) {
-        case 'cannon': {
-            ShooterConstructor = CannonShooter;
-            break;
-        }
-        case 'missile': {
-            ShooterConstructor = MissileLauncherShooter;
-            break;
-        }
-    }
+    const url = new URL(location.href);
+    let level = Number(url.searchParams.get('level')) || 0;
+    let type = Number(url.searchParams.get('type')) || 0;
 
     /**
      * @type {Record<string, Opponent>}
@@ -45,6 +33,17 @@ export function renderCanvas() {
     }
 
     function _render() {
+        let ShooterConstructor = MachineGunShooter;
+        switch(type) {
+            case 1: {
+                ShooterConstructor = CannonShooter;
+                break;
+            }
+            case 2: {
+                ShooterConstructor = MissileLauncherShooter;
+                break;
+            }
+        }
         center = {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
@@ -142,4 +141,18 @@ export function renderCanvas() {
         syncChannel.postMessage(createMessage('ping', getPingData()));
     });
     _render();
+
+    const $canvas = document.querySelector('#app');
+    $canvas.addEventListener('click', () => {
+        level = level >= 2 ? 0 : level + 1;
+        url.searchParams.set('level', level);
+        history.pushState(undefined, undefined, url.href);
+        _render();
+    });
+    $canvas.addEventListener('contextmenu', () => {
+        type = type >= 2 ? 0 : type + 1;
+        url.searchParams.set('type', type);
+        history.pushState(undefined, undefined, url.href);
+        _render();
+    });
 }
