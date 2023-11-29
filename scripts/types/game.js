@@ -201,7 +201,7 @@ export class Shooter extends BaseObject {
         this.speed = this.__proto__.constructor.LEVELS[value].speed;
         this.width = this.__proto__.constructor.LEVELS[value].width;
         this.height = this.__proto__.constructor.LEVELS[value].height;
-        this.image = this.__proto__.constructor.LEVELS[value].image;
+        this._image = this.__proto__.constructor.LEVELS[value].image;
         this.ATTACH_POSITION = this.__proto__.constructor.LEVELS[value].ATTACH_POSITION;
     }
 
@@ -238,7 +238,6 @@ export class Shooter extends BaseObject {
 }
 
 export class MachineGunShooter extends Shooter {
-
     static {
         const src = (level) => `/assets/MG${level}.png`;
         const LEVELS = [
@@ -254,7 +253,7 @@ export class MachineGunShooter extends Shooter {
             },
             {
                 image: loadResouce(80, 167, src`2`),
-                width: 80,
+                width: 110,
                 height: 167,
                 speed: 0.333,
                 ATTACH_POSITION: {
@@ -275,8 +274,84 @@ export class MachineGunShooter extends Shooter {
         ];
         this.LEVELS = LEVELS;
     }
+}
 
+export class CannonShooter extends Shooter {
+    static {
+        const src = (level) => `/assets/Cannon${level}.png`;
+        const LEVELS = [
+            {
+                image: loadResouce(80, 167, src`1`),
+                width: 80,
+                height: 167,
+                speed: 0.5,
+                ATTACH_POSITION: {
+                    x: 120 * 9.5 / 29,
+                    y: 80 / 2 * 3
+                }
+            },
+            {
+                image: loadResouce(80, 167, src`2`),
+                width: 100,
+                height: 167,
+                speed: 0.333,
+                ATTACH_POSITION: {
+                    x: 154 * 9.5 / 29,
+                    y: 80 / 2 * 3
+                }
+            },
+            {
+                image: loadResouce(80, 167, src`3`),
+                width: 80,
+                height: 167,
+                speed: 0.2,
+                ATTACH_POSITION: {
+                    x: 120 * 9.5 / 29,
+                    y: 80 / 2 * 3
+                }
+            },
+        ];
+        this.LEVELS = LEVELS;
+    }
+}
 
+export class MissileLauncherShooter extends Shooter {
+    static {
+        const src = (level) => `/assets/MissileLauncher${level}.png`;
+        const LEVELS = [
+            {
+                image: loadResouce(80, 167, src`1`),
+                width: 80,
+                height: 167,
+                speed: 0.5,
+                ATTACH_POSITION: {
+                    x: 120 * 9.5 / 29,
+                    y: 77 / 2 * 3
+                }
+            },
+            {
+                image: loadResouce(80, 167, src`2`),
+                width: 110,
+                height: 167,
+                speed: 0.333,
+                ATTACH_POSITION: {
+                    x: 167 * 9.5 / 29,
+                    y: 60 / 2 * 3
+                }
+            },
+            {
+                image: loadResouce(80, 167, src`3`),
+                width: 125,
+                height: 167,
+                speed: 0.2,
+                ATTACH_POSITION: {
+                    x: 190 * 9.5 / 29,
+                    y: 60 / 2 * 3
+                }
+            },
+        ];
+        this.LEVELS = LEVELS;
+    }
 }
 
 export class Bullet extends BaseObject {

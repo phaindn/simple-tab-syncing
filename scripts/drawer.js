@@ -15,9 +15,24 @@
  */
 
 import { createMessage, syncChannel } from "./utils/sync.js";
-import { MachineGunShooter, Tower } from "./types/game.js";
+import { CannonShooter, MachineGunShooter, MissileLauncherShooter, Tower } from "./types/game.js";
 
 export function renderCanvas() {
+    const params = new URLSearchParams(location.search);
+    const level = params.get('level') || 0;
+    const type = params.get('type');
+
+    let ShooterConstructor = MachineGunShooter;
+    switch(type) {
+        case 'cannon': {
+            ShooterConstructor = CannonShooter;
+            break;
+        }
+        case 'missile': {
+            ShooterConstructor = MissileLauncherShooter;
+            break;
+        }
+    }
 
     /**
      * @type {Record<string, Opponent>}
@@ -49,7 +64,7 @@ export function renderCanvas() {
 
         Object.values(opponents).forEach(opponent => {
             const tower = new Tower();
-            tower.attach(new MachineGunShooter(Math.PI / 2, 0));
+            tower.attach(new ShooterConstructor(Math.PI / 2, level));
             
             if (!opponent) {
                 tower.drawTo(ctx, center.x, center.y);
