@@ -20,9 +20,10 @@ import { MachineGunShooter, Tower } from "./types/game.js";
 export function renderCanvas() {
 
     /**
-     * @type {Opponent}
+     * @type {Record<string, Opponent>}
      */
-    let opponent;
+    const opponents = {};
+
     let center = {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
@@ -46,41 +47,43 @@ export function renderCanvas() {
         ctx.arc(center.x, center.y, 120, 0, 2 * Math.PI);
         ctx.stroke();
 
-        const tower = new Tower();
-        tower.attach(new MachineGunShooter(Math.PI / 2));
-        
-        if (!opponent) {
+        Object.values(opponents).forEach(opponent => {
+            const tower = new Tower();
+            tower.attach(new MachineGunShooter(Math.PI / 2));
+            
+            if (!opponent) {
+                tower.drawTo(ctx, center.x, center.y);
+                return;
+            }
+
+            const lineTo = {
+                x: opponent.screenLeft + opponent.center.x - screenLeft,
+                y: opponent.screenTop + opponent.center.y - screenTop,
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y)
+            ctx.lineTo(lineTo.x, lineTo.y);
+            ctx.stroke();
+
+            const O = {
+                x: screenLeft + center.x,
+                y: screenTop + center.y,
+            }
+
+            const B = {
+                x: opponent.screenLeft + opponent.center.x - O.x,
+                y: opponent.screenTop + opponent.center.y - O.y,
+            }
+            const angle = Math.atan(B.y / B.x);
+
+            if (B.x >= 0) {
+                tower.rotateGun(angle);
+            } else {
+                tower.rotateGun(angle + Math.PI);
+            }
             tower.drawTo(ctx, center.x, center.y);
-            return;
-        }
-
-        const lineTo = {
-            x: opponent.screenLeft + opponent.center.x - screenLeft,
-            y: opponent.screenTop + opponent.center.y - screenTop,
-        }
-
-        ctx.beginPath();
-        ctx.moveTo(center.x, center.y)
-        ctx.lineTo(lineTo.x, lineTo.y);
-        ctx.stroke();
-
-        const O = {
-            x: screenLeft + center.x,
-            y: screenTop + center.y,
-        }
-
-        const B = {
-            x: opponent.screenLeft + opponent.center.x - O.x,
-            y: opponent.screenTop + opponent.center.y - O.y,
-        }
-        const angle = Math.atan(B.y / B.x);
-
-        if (B.x >= 0) {
-            tower.rotateGun(angle);
-        } else {
-            tower.rotateGun(angle + Math.PI);
-        }
-        tower.drawTo(ctx, center.x, center.y);
+        })
 
     }
 
@@ -99,20 +102,22 @@ export function renderCanvas() {
     syncChannel.addEventListener('message', (event) => {
         switch (event.data.type) {
             case 'ping': {
-                opponent = event.data.data;
+                opponents[event.data.id] = event.data.data
                 syncChannel.postMessage(createMessage('pong', getPingData()));
                 break;
             }
             case 'pong': {
-                opponent = event.data.data;
+                opponents[event.data.id] = event.data.data
                 break;
             }
             case 'disconnect': {
-                opponent = undefined;
+                delete opponents[event.data.id];
                 break;
             }
         }
-        _render();
+        requestAnimationFrame(() => {
+            _render();
+        })
     })
     syncChannel.postMessage(createMessage('ping', getPingData()));
     window.addEventListener('windowmove', (event) => {
