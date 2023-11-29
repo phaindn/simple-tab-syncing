@@ -14,7 +14,7 @@
  * @property {Coordinate} center
  */
 
-import { createMessage, syncChannel } from "./sync.js";
+import { createMessage, syncChannel } from "./utils/sync.js";
 import { MachineGunShooter, Tower } from "./types/game.js";
 
 export function renderCanvas() {
