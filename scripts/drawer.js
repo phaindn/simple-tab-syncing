@@ -14,6 +14,8 @@
  * @property {Coordinate} center
  */
 
+import { MachineGunShooter, Tower } from "./types/game.js";
+
 (function draw() {
     /**
      * @type {BroadcastChannel}
@@ -41,21 +43,51 @@
         $canvas.width = window.innerWidth;
         $canvas.height = window.innerHeight;
         const ctx = $canvas.getContext("2d");
+        ctx.reset()
+
         ctx.beginPath();
-        ctx.arc(center.x, center.y, 40, 0, 2 * Math.PI);
+        ctx.arc(center.x, center.y, 120, 0, 2 * Math.PI);
         ctx.stroke();
 
+        const tower = new Tower();
+        tower.attach(new MachineGunShooter(Math.PI / 2));
+        
         if (!opponent) {
+            tower.drawTo(ctx, center.x, center.y);
             return;
         }
-        ctx.beginPath();
-        ctx.moveTo(center.x, center.y)
-        let lineTo = {
+
+        const lineTo = {
             x: opponent.screenLeft + opponent.center.x - screenLeft,
             y: opponent.screenTop + opponent.center.y - screenTop,
         }
+        const current = {
+            x: screenLeft + center.x,
+            y: screenTop + center.y,
+        }
+        const currentVector = {
+            x: 0,
+            y: current.y,
+        }
+        const lineToVector = {
+            x: current.x - lineTo.x,
+            y: current.y - lineTo.y,
+        }
+
+        ctx.reset();
+
+        ctx.beginPath();
+        ctx.moveTo(center.x, center.y)
         ctx.lineTo(lineTo.x, lineTo.y);
         ctx.stroke();
+
+        const cosine = (currentVector.x * lineToVector.x + currentVector.y * lineToVector.y) / (Math.sqrt(currentVector.x**2 + currentVector.y**2) * Math.sqrt(lineToVector.x**2 + lineToVector.y**2));
+
+        const angle = Math.acos(cosine) / Math.PI * 180;
+        tower.rotateGun(angle);
+        tower.drawTo(ctx, center.x, center.y);
+        
+        
     }
 
     function getPingData() {
